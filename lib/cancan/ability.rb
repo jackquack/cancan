@@ -122,7 +122,9 @@ module CanCan
     #   end
     #
     def can(action = nil, subject = nil, conditions = nil, &block)
-      rules << Rule.new(true, action, subject, conditions, block)
+      class_symbol = subject.to_s.to_sym
+      rules[class_symbol] ||= []
+      rules[class_symbol] << Rule.new(true, action, subject, conditions, block)
     end
 
     # Defines an ability which cannot be done. Accepts the same arguments as "can".
@@ -138,7 +140,9 @@ module CanCan
     #   end
     #
     def cannot(action = nil, subject = nil, conditions = nil, &block)
-      rules << Rule.new(false, action, subject, conditions, block)
+      class_symbol = subject.to_s.to_sym
+      rules[class_symbol] ||= []
+      rules[class_symbol] << Rule.new(false, action, subject, conditions, block)
     end
 
     # Alias one or more actions into another one.
@@ -272,13 +276,15 @@ module CanCan
     end
 
     def rules
-      @rules ||= []
+      @rules ||= {all: []}
     end
 
     # Returns an array of Rule instances which match the action and subject
     # This does not take into consideration any hash conditions or block statements
     def relevant_rules(action, subject)
-      rules.reverse.select do |rule|
+      class_symbol = subject.class == Class ? subject.to_s.to_sym : subject.class.to_s.to_sym
+      rules[class_symbol] ||= []
+      rules[:all]+rules[class_symbol].select do |rule|
         rule.expanded_actions = expand_actions(rule.actions)
         rule.relevant? action, subject
       end
