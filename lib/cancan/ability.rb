@@ -282,7 +282,7 @@ module CanCan
     # Returns an array of Rule instances which match the action and subject
     # This does not take into consideration any hash conditions or block statements
     def relevant_rules(action, subject)
-      class_symbol = subject.class.to_s.to_sym
+      class_symbol = subject.class == Class ? subject.to_s.to_sym : subject.class.to_s.to_sym
       rules[class_symbol] ||= []
       rules[:all]+rules[class_symbol].select do |rule|
         rule.expanded_actions = expand_actions(rule.actions)
