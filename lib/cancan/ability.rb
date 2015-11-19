@@ -284,7 +284,7 @@ module CanCan
     def relevant_rules(action, subject)
       class_symbol = subject.class == Class ? subject.to_s.to_sym : subject.class.to_s.to_sym
       rules[class_symbol] ||= []
-      rules[:all]+rules[class_symbol].select do |rule|
+      (rules[:all]+rules[class_symbol]).select do |rule|
         rule.expanded_actions = expand_actions(rule.actions)
         rule.relevant? action, subject
       end
